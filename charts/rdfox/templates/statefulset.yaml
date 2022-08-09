@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rdfox.fullname" . }}
+  labels:
+    {{- include "rdfox.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rdfox.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "rdfox.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rdfox.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rdfox.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          args:
+            - '-license-file'
+            - '/license/RDFox.lic'
+            {{ if .Values.maxMemory }}
+            - '-max-memory'
+            - '{{ .Values.maxMemory }}'
+            {{ end }}
+            {{ if .Values.numThreads }}
+            - '-num-threads'
+            - '{{ .Values.numThreads }}'
+            {{ end }}
+            - 'daemon'
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 12110
+              protocol: TCP
+          volumeMounts:
+            - name: license
+              mountPath: /license
+              readOnly: true
+            - name: server-directory
+              mountPath: /home/rdfox/.RDFox
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+          env:
+            - name: RDFOX_ROLE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rdfox.fullname" . }}
+                  key: role
+            - name: RDFOX_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rdfox.fullname" . }}
+                  key: password
+            - name: RDFOX_LICENSE_CONTENT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.licenseSecretName }}
+                  key: RDFox.lic
+          volumeMounts:
+            - name: server-directory
+              mountPath: /home/rdfox/.RDFox
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: license
+          secret:
+            secretName: {{ .Values.licenseSecretName }}
+            items:
+              - key: RDFox.lic
+                path: RDFox.lic
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: server-directory
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.storageClass }}
+        resources:
+          requests:
+            storage: {{ .Values.storageSize }}
