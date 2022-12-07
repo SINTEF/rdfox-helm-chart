@@ -3,6 +3,17 @@ entries:
   rdfox:
   - apiVersion: v2
     appVersion: "5.6"
+    created: "2022-12-07T09:58:14.987576299Z"
+    description: A Helm chart for RDFox (High-performance knowledge graph and semantic
+      reasoning engine).
+    digest: 1200654d58b027d1358a8ae45e0780bf3a0ffe1f5fa15ed72986873e56817683
+    name: rdfox
+    type: application
+    urls:
+    - https://github.com/SINTEF/rdfox-helm-chart/releases/download/rdfox-0.1.2/rdfox-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: "5.6"
     created: "2022-08-09T12:05:37.967407942Z"
     description: A Helm chart for RDFox (High-performance knowledge graph and semantic
       reasoning engine).
@@ -12,4 +23,4 @@ entries:
     urls:
     - https://github.com/SINTEF/rdfox-helm-chart/releases/download/rdfox-0.1.1/rdfox-0.1.1.tgz
     version: 0.1.1
-generated: "2022-08-09T12:05:37.967413042Z"
+generated: "2022-12-07T09:58:14.987584399Z"
