@@ -16,6 +16,8 @@ initImage:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+probesInitialDelaySeconds: 30
+
 # Storage class for the server directory.
 # Override to not use the default one.
 storageClass: ""

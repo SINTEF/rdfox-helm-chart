@@ -46,3 +46,4 @@ helm install rdfox rdfox/rdfox
 | `nodeSelector` | Note selector settings | *see values.yaml* |
 | `tolerations` | Tolerations settings | *see values.yaml* |
 | `affinity` | Affinity settings | *see values.yaml* |
+| `probesInitialDelaySeconds` | The initial delay for the probes | `30` |

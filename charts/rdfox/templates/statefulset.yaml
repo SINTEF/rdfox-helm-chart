@@ -58,10 +58,12 @@ spec:
             httpGet:
               path: /health
               port: http
+            initialDelaySeconds: {{ .Values.probesInitialDelaySeconds }}
           readinessProbe:
             httpGet:
               path: /health
               port: http
+            initialDelaySeconds: {{ .Values.probesInitialDelaySeconds }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       initContainers:
